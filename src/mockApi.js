@@ -1,0 +1,168 @@
+// Mock API for static deployment without backend
+// This provides sample data when backend is not available
+
+const mockData = {
+  candidates: [
+    {
+      id: 1,
+      name: "John Doe",
+      email: "john@example.com",
+      skills: "React, Node.js, JavaScript"
+    },
+    {
+      id: 2,
+      name: "Jane Smith",
+      email: "jane@example.com",
+      skills: "Python, Django, PostgreSQL"
+    },
+    {
+      id: 3,
+      name: "Mike Johnson",
+      email: "mike@example.com",
+      skills: "Java, Spring Boot, MySQL"
+    }
+  ],
+  
+  companies: [
+    {
+      id: 1,
+      companyName: "Tech Corp",
+      email: "company@techcorp.com",
+      description: "Leading technology company",
+      isVerified: true,
+      verificationCode: "123456"
+    },
+    {
+      id: 2,
+      companyName: "StartupXYZ",
+      email: "info@startupxyz.com",
+      description: "Innovative startup",
+      isVerified: false,
+      verificationCode: "789012"
+    }
+  ],
+  
+  offers: [
+    {
+      id: 1,
+      companyId: 1,
+      candidateId: 1,
+      message: "We would like to offer you a Senior Developer position!",
+      isVerifiedCompany: true,
+      companyName: "Tech Corp",
+      createdAt: new Date().toISOString(),
+      status: "PENDING"
+    },
+    {
+      id: 2,
+      companyId: 2,
+      candidateId: 1,
+      message: "Join our team as a Full Stack Developer!",
+      isVerifiedCompany: false,
+      companyName: "StartupXYZ",
+      createdAt: new Date().toISOString(),
+      status: "PENDING"
+    }
+  ]
+};
+
+// Mock API functions
+export const mockApi = {
+  // Candidate APIs
+  registerCandidate: async (candidateData) => {
+    console.log('Mock: Registering candidate', candidateData);
+    const newCandidate = {
+      id: mockData.candidates.length + 1,
+      ...candidateData
+    };
+    mockData.candidates.push(newCandidate);
+    return newCandidate;
+  },
+
+  getAllCandidates: async () => {
+    console.log('Mock: Getting all candidates');
+    return mockData.candidates;
+  },
+
+  // Company APIs
+  registerCompany: async (companyData) => {
+    console.log('Mock: Registering company', companyData);
+    const newCompany = {
+      id: mockData.companies.length + 1,
+      isVerified: false,
+      verificationCode: Math.random().toString(36).substring(2, 8),
+      ...companyData
+    };
+    mockData.companies.push(newCompany);
+    return newCompany;
+  },
+
+  getAllCompanies: async () => {
+    console.log('Mock: Getting all companies');
+    return mockData.companies;
+  },
+
+  // Offer APIs
+  createOffer: async (offerData) => {
+    console.log('Mock: Creating offer', offerData);
+    const company = mockData.companies.find(c => c.id === offerData.companyId);
+    const newOffer = {
+      id: mockData.offers.length + 1,
+      isVerifiedCompany: company?.isVerified || false,
+      companyName: company?.companyName || 'Unknown Company',
+      createdAt: new Date().toISOString(),
+      status: "PENDING",
+      ...offerData
+    };
+    mockData.offers.push(newOffer);
+    return newOffer;
+  },
+
+  getAllOffers: async () => {
+    console.log('Mock: Getting all offers');
+    return mockData.offers;
+  },
+
+  getOffersByCandidateId: async (candidateId) => {
+    console.log('Mock: Getting offers for candidate', candidateId);
+    return mockData.offers.filter(offer => offer.candidateId === candidateId);
+  },
+
+  getOffersByCompanyId: async (companyId) => {
+    console.log('Mock: Getting offers for company', companyId);
+    return mockData.offers.filter(offer => offer.companyId === companyId);
+  },
+
+  // Auth APIs
+  login: async (credentials) => {
+    console.log('Mock: Login attempt', credentials);
+    
+    // Check if it's a candidate
+    const candidate = mockData.candidates.find(c => 
+      c.email === credentials.email && c.password === credentials.password
+    );
+    
+    if (candidate) {
+      return {
+        role: 'candidate',
+        data: candidate
+      };
+    }
+    
+    // Check if it's a company
+    const company = mockData.companies.find(c => 
+      c.email === credentials.email && c.password === credentials.password
+    );
+    
+    if (company) {
+      return {
+        role: 'company',
+        data: company
+      };
+    }
+    
+    throw new Error('Invalid email or password');
+  }
+};
+
+export default mockApi;
